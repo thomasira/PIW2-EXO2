@@ -64,12 +64,12 @@ export default class GestionnaireSondage {
      */
     getSondages() {
         fetch('api/sondages/rechercher.php').
-        then(dataIn => { return dataIn.json() }).
-        then(dataF => { 
-            dataF.forEach((element, index) => {
-                this.injecterSondageHTML(element, index);
-            });
-         });
+        then(response => { 
+            if (response.ok) return response.json();
+            else throw new Error("erreur de données");
+             }).
+        then(dataF => dataF.forEach((element, index) => this.injecterSondageHTML(element, index))).
+        catch(e => console.log(e.message));
     }
 
     /**
@@ -90,11 +90,11 @@ export default class GestionnaireSondage {
      * Trouve et supprime l'élément dans la liste des sondages et mets la liste à jour avec la méthode mettreAJourLesSondagesHTML()
      */
     supprimerSondage(id, elementHTML) {
-       elementHTML.remove();
-       fetch('api/sondages/supprimer.php', {
-        method: 'post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({'id': id})
+        elementHTML.remove();
+        fetch('api/sondages/supprimer.php', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({'id': id})
         }).
         then(dataIn => { return dataIn.json() }).
         then(() => { elementHTML.remove(); });
