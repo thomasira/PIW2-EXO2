@@ -14,29 +14,8 @@ export default class GestionnaireSondage {
      * Initialisation de l'application
      */
     init() {
-        const delay = new Promise(resolve => {
-            this.getSondages().then(); resolve();
-           /*  setTimeout(()=> {resolve()}, 4000) */
-        }).then(() => console.log(this.#sondages));
 
-/*         function operationAsynchrone(delay) {
-            return new Promise(function(resolve) {
-                setTimeout(function() {
-                    console.log("Opération asynchrone terminée");
-                    resolve();
-                }, delay);
-            });
-        }
-        console.log("Début");
-        operationAsynchrone(1000)
-        .then(function() {
-           return operationAsynchrone(1000);
-        })
-        .then(function() {
-            return operationAsynchrone(1000);
-        })
-        .then(function() { console.log("Fin") }); */
-        
+            this.getSondages();
         //Lors de l'envoi du formulaire, on bloque le comportement par défaut et on ajoute le sondage
         this.#form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -51,17 +30,16 @@ export default class GestionnaireSondage {
     mettreAJourLesSondagesHTML() {
         this.#sondageListe.innerHTML = '';
         this.#sondages.forEach(sondage => {
-            /* console.log(sondage) */
             this.injecterSondageHTML(sondage, index)})
     }
 
     /**
      * Injecte un nouveau sondage à la fin de la liste des sondages
      */
-    injecterSondageHTML(sondage, index) {
+    injecterSondageHTML(sondage) {
         /* console.log(sondage) */
         const html = `
-        <div class="item" data-id="${sondage.id}">ID Vote ${sondage.id} | Choix :${sondage.niveau}<i data-btn-supprimer class="fa fa-trash"></i></div>
+            <div class="item" data-id="${sondage.id}">ID Vote ${sondage.id} | Choix :${sondage.niveau}<i data-btn-supprimer class="fa fa-trash"></i></div>
         `;
         this.#sondageListe.insertAdjacentHTML('beforeend', html);
 
@@ -82,7 +60,10 @@ export default class GestionnaireSondage {
             if(response.ok) return response.json();
             else throw new Error('La réponse n\'est pas valide'); 
         }).
-        then(dataF => {dataF.forEach(element => this.#sondages.push(element)); return true;} ).
+        then(dataF => dataF.forEach((element, index) => {
+            this.injecterSondageHTML(element, index);
+            this.#sondages.push(element);
+        })).
         catch(error => console.error('Échec: ', error));
     }
 
@@ -96,7 +77,10 @@ export default class GestionnaireSondage {
             body: JSON.stringify(sondage)
         }).
         then(dataIn => { return dataIn.json() }).
-        then(dataF => this.#sondages.push(dataF));
+        then(dataF => {
+            this.injecterSondageHTML(dataF)
+            this.#sondages.push({niveau: dataF.niveau, id: dataF.id});
+        });
     }
 
     /**
@@ -110,6 +94,11 @@ export default class GestionnaireSondage {
             body: JSON.stringify({'id': id})
             }).
         then(dataIn => { return dataIn.json() }).
-        then(() => { elementHTML.remove() });
+        then(() => {
+            this.#sondages.forEach((element, index) => {
+                if(element.id == id) this.#sondages.splice(index, 1);
+            });
+            elementHTML.remove();
+        });
     }
 }

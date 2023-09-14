@@ -7,7 +7,7 @@ try {
     // 1. Se connecter à la base de données
     // Si la connexion est réussie, la variable $connection contiendra l'objet représentant la connexion
     // Sinon, une exception sera levée
-    $connexion = new mysqli("localhost", "root", "", "satisfactionapp");
+    $connexion = new mysqli("localhost", "root", "", "piw2-sondage");
     if (mysqli_connect_errno()) {
         throw new Exception("Impossible de se connecter à la DB");
     }
