@@ -15,12 +15,13 @@ export default class GestionnaireSondage {
      */
     init() {
 
-            this.getSondages();
+        this.getSondages();
         //Lors de l'envoi du formulaire, on bloque le comportement par défaut et on ajoute le sondage
         this.#form.addEventListener('submit', (e) => {
             e.preventDefault();
             this.ajouterSondage({ niveau: this.#form.niveau.value });
         });
+        this.calculerTotaux();
     }
 
     /**
@@ -63,6 +64,8 @@ export default class GestionnaireSondage {
         then(dataF => dataF.forEach((element, index) => {
             this.injecterSondageHTML(element, index);
             this.#sondages.push(element);
+            const ready = new Event('readySondage');
+
         })).
         catch(error => console.error('Échec: ', error));
     }
@@ -99,6 +102,13 @@ export default class GestionnaireSondage {
                 if(element.id == id) this.#sondages.splice(index, 1);
             });
             elementHTML.remove();
+        });
+    }
+
+    calculerTotaux(){
+        console.log(this.#sondages)
+        this.#sondages.forEach(element => {
+            console.log(element)
         });
     }
 }
